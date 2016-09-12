@@ -1,0 +1,32 @@
+
+
+
+
+
+
+# Partition clearing information
+zerombr
+clearpart --none --initlabel --drives=sda,sdb
+
+# create RAID1s
+
+part raid.11 --size=256 --ondrive=sda
+part raid.12 --size=1 --grow --ondrive=sda
+
+
+
+part raid.21 --size=256 --ondrive=sdb
+part raid.22 --size=1 --grow --ondrive=sdb
+
+raid /boot --fstype ext4 --device=md1 --level=RAID1 raid.11 raid.21
+raid pv.01 --device=md0 --level=RAID1 raid.12 raid.22
+
+volgroup sysvg pv.01
+logvol / --vgname=sysvg --size=512 --name=lv_root --fstype=ext4
+logvol swap --vgname=sysvg --name=lv_swap --grow --size=256 --maxsize=512
+logvol /home --vgname=sysvg --size=1 --grow --size=1024678 --name=lv_home
+
+#Templating tests
+#.host.etcd_name={{.host.etcd_name}}
+#.env.networkd_dns={{.env.networkd_dns}}
+#.agent.url={{.agent.url}}
